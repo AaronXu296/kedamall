@@ -15,6 +15,9 @@
         <module>kedamall-coupon</module>
         <module>kedamall-member</module>
         <module>kedamall-order</module>
+        <module>renren-fast</module>
+        <module>renren-generator</module>
+        <module>kedamall-common</module>
     </modules>
 
 </project>
