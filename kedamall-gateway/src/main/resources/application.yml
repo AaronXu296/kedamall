@@ -11,3 +11,17 @@ spring:
           uri: http://www.qq.com
           predicates:
             - Query=url,qq
+        - id: product_route
+          uri: lb://kedamall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: admin_route
+          uri: lb://renren-fast
+          predicates:
+            - Path=/api/**
+          filters:
+              ##重写
+            - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+##前端项目发送请求都带上 api 前缀
