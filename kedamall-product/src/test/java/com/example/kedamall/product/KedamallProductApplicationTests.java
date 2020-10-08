@@ -30,10 +30,9 @@ class KedamallProductApplicationTests {
     @Test
     public void testUpload() throws FileNotFoundException {
 //        // Endpoint以杭州为例，其它Region请按实际情况填写。
-//        String endpoint = "oss-cn-chengdu.aliyuncs.com";
-//        // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建RAM账号。
-//        String accessKeyId = "LTAI4GAZUbcXaQ7w812Ujaqr";
-//        String accessKeySecret = "7hwlOA52Wx6JeJjW9jzPESYeMgD6qm";
+//        String endpoint = "";
+//        String accessKeyId = "";
+//        String accessKeySecret = "";
 //
 //        // 创建OSSClient实例。
 //        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId,accessKeySecret);
