@@ -1,8 +1,14 @@
 package com.example.kedamall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.kedamall.product.entity.CategoryBrandRelationEntity;
+import com.example.kedamall.product.service.CategoryBrandRelationService;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,11 +22,13 @@ import com.example.common.utils.Query;
 import com.example.kedamall.product.dao.CategoryDao;
 import com.example.kedamall.product.entity.CategoryEntity;
 import com.example.kedamall.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
-
+    @Autowired
+    CategoryBrandRelationService categoryBrandRelationService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryEntity> page = this.page(
@@ -63,6 +71,37 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public void removeMenuByIds(List<Long> asList) {
         //TODO 检查当前要删除的菜单是否被别的地方引用
         baseMapper.deleteBatchIds(asList);
+    }
+
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> paths = new ArrayList<>();
+        findParentPath(catelogId,paths);
+        Collections.reverse(paths);
+
+        return (Long[]) paths.toArray(new Long[paths.size()]);
+    }
+
+    /**
+     * 级联更新所有关联的数据
+     * @param category
+     */
+    @Transactional
+    @Override
+    public void updateCascade(CategoryEntity category) {
+        this.updateById(category);
+        if(!StringUtils.isEmpty(category.getName())){
+            categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+        }
+    }
+
+    public void findParentPath(Long catelogId, List<Long> paths){
+        paths.add(catelogId);
+
+        CategoryEntity byId = this.getById(catelogId);
+        if(byId.getParentCid()!=0){
+            findParentPath(byId.getParentCid(),paths);
+        }
     }
 
 }

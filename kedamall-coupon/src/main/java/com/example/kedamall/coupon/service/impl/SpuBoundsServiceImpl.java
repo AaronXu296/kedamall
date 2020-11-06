@@ -1,5 +1,6 @@
 package com.example.kedamall.coupon.service.impl;
 
+import com.example.common.to.SpuBoundsTo;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -24,6 +25,11 @@ public class SpuBoundsServiceImpl extends ServiceImpl<SpuBoundsDao, SpuBoundsEnt
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void save(SpuBoundsTo spuBoundsTo) {
+        this.save(spuBoundsTo);
     }
 
 }

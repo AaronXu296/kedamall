@@ -1,22 +1,41 @@
+##前端项目发送请求都带上 api 前缀
 spring:
   cloud:
     gateway:
       routes:
-        - id: test_route
-          uri: https://www.baidu.com
-          predicates:
-            - Query=url,baidu
-
-        - id: qq_route
-          uri: http://www.qq.com
-          predicates:
-            - Query=url,qq
+#        - id: test_route
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Query=url,baidu
+#
+#        - id: qq_route
+#          uri: http://www.qq.com
+#          predicates:
+#            - Query=url,qq
         - id: product_route
           uri: lb://kedamall-product
           predicates:
             - Path=/api/product/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: member_route
+          uri: lb://kedamall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: ware_route
+          uri: lb://kedamall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: third_party_route
+          uri: lb://kedamall-thrid-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
         - id: admin_route
           uri: lb://renren-fast
           predicates:
@@ -24,4 +43,4 @@ spring:
           filters:
               ##重写
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
-##前端项目发送请求都带上 api 前缀
+

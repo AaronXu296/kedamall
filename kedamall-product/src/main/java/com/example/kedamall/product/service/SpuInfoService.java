@@ -2,7 +2,9 @@ package com.example.kedamall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.utils.PageUtils;
+import com.example.kedamall.product.entity.SpuInfoDescEntity;
 import com.example.kedamall.product.entity.SpuInfoEntity;
+import com.example.kedamall.product.vo.SpuSaveVo;
 
 import java.util.Map;
 
@@ -16,5 +18,11 @@ import java.util.Map;
 public interface SpuInfoService extends IService<SpuInfoEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void saveSpuInfo(SpuSaveVo vo);
+
+    void saveBaseSpuInfo(SpuInfoEntity infoEntity);
+
+    PageUtils queryPageByCondition(Map<String, Object> params);
 }
 
