@@ -8,9 +8,11 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-
+    alicloud:
+        access-key:
+      secret-key:
+      oss:
+        endpoint:
 
 
 mybatis-plus:
@@ -27,11 +29,4 @@ server:
 logging:
   level:
     com.example.kedamall: debug
-feign:
-  client:
-    config:
-      default:
-        connect-timeout: 20000
-        read-timeout: 20000
-  hystrix:
-    enabled: false
+
