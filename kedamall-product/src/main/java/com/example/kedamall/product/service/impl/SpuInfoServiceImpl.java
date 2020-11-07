@@ -1,10 +1,16 @@
 package com.example.kedamall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
+import com.example.common.constant.ProductConstant;
+import com.example.common.to.SkuHasStockVo;
 import com.example.common.to.SkuReductionTo;
 import com.example.common.to.SpuBoundsTo;
+import com.example.common.to.es.SkuEsModel;
 import com.example.common.utils.R;
 import com.example.kedamall.product.entity.*;
 import com.example.kedamall.product.feign.CouponFeignService;
+import com.example.kedamall.product.feign.SearchFeighService;
+import com.example.kedamall.product.feign.WareFeignService;
 import com.example.kedamall.product.service.*;
 import com.example.kedamall.product.vo.*;
 import org.apache.commons.lang.StringUtils;
@@ -15,9 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -56,6 +60,18 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     CouponFeignService couponFeignService;
+
+    @Autowired
+    BrandService brandService;
+
+    @Autowired
+    CategoryService categoryService;
+
+    @Autowired
+    WareFeignService wareFeignService;
+
+    @Autowired
+    SearchFeighService searchFeighService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -219,6 +235,78 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void up(Long spuId) {
+        List<SkuInfoEntity> skus = skuInfoService.getSkusBySpuId(spuId);
+        //TODO 4、按照spu查询当前sku所有的可被用来检索的规格属性
+        List<ProductAttrValueEntity> baseAttrs = attrValueService.baseAttrListForSpu(spuId);
+        List<Long> attrIds = baseAttrs.stream().map(attr -> {
+            return attr.getAttrId();
+        }).collect(Collectors.toList());
+
+        List<Long> searchAttrIds = attrService.selectSearchAttrsIds(attrIds);
+        Set<Long> idSet = new HashSet<>(searchAttrIds);
+
+        List<SkuEsModel.Attr> attrList = baseAttrs.stream().filter(attr -> {
+            return idSet.contains(attr.getAttrId());
+        }).map(attr -> {
+            SkuEsModel.Attr attr1 = new SkuEsModel.Attr();
+            BeanUtils.copyProperties(attr, attr1);
+            return attr1;
+        }).collect(Collectors.toList());
+
+        //TODO 1、远程调用查询：是否有库存？
+        List<Long> skuIds = skus.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
+        Map<Long, Boolean> stockMap = null;
+        try {
+            R r = wareFeignService.getSkuHasStock(skuIds);
+            TypeReference<List<SkuHasStockVo>> typeReference = new TypeReference<List<SkuHasStockVo>>() {
+            };
+            stockMap = r.getData(typeReference).stream().
+                    collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
+        } catch (Exception e){
+            log.error("库存服务查询出现异常:{}",e);
+        }
+
+        Map<Long, Boolean> finalStockMap = stockMap;
+        List<SkuEsModel> upProducts = skus.stream().map(sku -> {
+            SkuEsModel esModel = new SkuEsModel();
+            BeanUtils.copyProperties(sku,esModel);
+
+            esModel.setSkuPrice(sku.getPrice());
+            esModel.setSkuImg(sku.getSkuDefaultImg());
+
+            if(finalStockMap ==null){
+                esModel.setHasStock(true);
+            } else {
+                esModel.setHasStock(finalStockMap.containsKey(sku.getSkuId()));
+            }
+            //TODO 2、热度评分，0
+            esModel.setHotScore(0L);
+            //TODO 3、品牌和分类的名字和信息
+            BrandEntity brandEntity = brandService.getById(esModel.getBrandId());
+            esModel.setBrandName(brandEntity.getName());
+            esModel.setBrandImg(brandEntity.getLogo());
+
+            CategoryEntity categoryEntity = categoryService.getById(esModel.getCatalogId());
+            esModel.setCatalogName(categoryEntity.getName());
+
+            //设置检索属性
+            esModel.setAttrs(attrList);
+            return esModel;
+        }).collect(Collectors.toList());
+        //TODO 5、数据发送给es进行保存：kedamall-search
+        R r = searchFeighService.productStatusUp(upProducts);
+        if(r.getCode()==0){
+            //远程调用成功
+            //TODO 修改当前spu状态
+            this.baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        }else {
+            //远程调用失败
+            //TODO 重复调用？接口幂等性?重试机制
+        }
     }
 
 

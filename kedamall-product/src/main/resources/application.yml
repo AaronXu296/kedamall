@@ -10,7 +10,12 @@ spring:
         server-addr: 127.0.0.1:8848
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
-
+  thymeleaf:
+    cache: false
+  mvc:
+    static-path-pattern: /static/**    #静态资源的请求方式
+  resources:
+    static-locations: classpath:/static/  # 静态资源的配置位置，可以写成一个数组配置多个目录
 
 
 mybatis-plus:
@@ -35,3 +40,4 @@ feign:
         read-timeout: 20000
   hystrix:
     enabled: false
+

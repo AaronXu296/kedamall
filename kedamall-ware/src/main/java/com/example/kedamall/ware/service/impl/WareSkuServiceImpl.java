@@ -2,12 +2,15 @@ package com.example.kedamall.ware.service.impl;
 
 import com.example.common.utils.R;
 import com.example.kedamall.ware.feign.ProductFeignService;
+import com.example.kedamall.ware.vo.SkuHasStockVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -68,6 +71,20 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             this.baseMapper.insert(wareSkuEntity);
         }
         this.baseMapper.addStock(skuId,wareId,skuNum);
+    }
+
+    @Override
+    public List<SkuHasStockVo> getSkuHasStock(List<Long> skuIds) {
+        List<SkuHasStockVo> collect = skuIds.stream().map(sku -> {
+            SkuHasStockVo vo = new SkuHasStockVo();
+            //查询数据库（sku库存）
+            //SELECT SUM(stock-stock_locked) FROM wms_ware_sku WHERE sku_id=1;
+            Long count = this.baseMapper.getSkuStock(sku);
+            vo.setSkuId(sku);
+            vo.setHasStock(count==null?false:count>0);
+            return vo;
+        }).collect(Collectors.toList());
+        return collect;
     }
 
 }
