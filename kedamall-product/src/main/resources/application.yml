@@ -16,6 +16,9 @@ spring:
     static-path-pattern: /static/**    #静态资源的请求方式
   resources:
     static-locations: classpath:/static/  # 静态资源的配置位置，可以写成一个数组配置多个目录
+  redis:
+    host: 132.232.15.2
+    port: 6379
 
 
 mybatis-plus:
@@ -40,4 +43,3 @@ feign:
         read-timeout: 20000
   hystrix:
     enabled: false
-

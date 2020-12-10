@@ -3,6 +3,7 @@ package com.example.kedamall.product.service.impl;
 import com.example.kedamall.product.entity.AttrEntity;
 import com.example.kedamall.product.service.AttrService;
 import com.example.kedamall.product.vo.AttrGroupWithAttrsVo;
+import com.example.kedamall.product.vo.SpuItemAttrGroupVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,14 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
             return vo;
         }).collect(Collectors.toList());
         return collect;
+    }
+
+    @Override
+    public List<SpuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId) {
+        //
+        AttrGroupDao attrGroupDao = this.baseMapper;
+        List<SpuItemAttrGroupVo> vos = baseMapper.getAttrGroupWithAttrsBySpuId(spuId,catalogId);
+        return null;
     }
 
 }

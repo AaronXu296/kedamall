@@ -4,11 +4,19 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSClientBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.kedamall.product.dao.SkuSaleAttrValueDao;
 import com.example.kedamall.product.entity.BrandEntity;
+import com.example.kedamall.product.service.AttrGroupService;
 import com.example.kedamall.product.service.BrandService;
+import com.example.kedamall.product.service.SkuSaleAttrValueService;
+import com.example.kedamall.product.vo.SpuItemAttrGroupVo;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
@@ -17,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 class KedamallProductApplicationTests {
@@ -25,7 +34,41 @@ class KedamallProductApplicationTests {
     BrandService brandService;
 
     @Autowired
-    private OSSClient ossClient;
+    AttrGroupService attrGroupService;
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    RedissonClient redissonClient;
+
+    @Autowired
+    SkuSaleAttrValueDao skuSaleAttrValueDao;
+
+    @Test
+    public void saleAttrTe(){
+        System.out.println(skuSaleAttrValueDao.getSaleAttrsBySpuId(13L));
+    }
+
+    @Test
+    public void RedissonTest(){
+        System.out.println(redissonClient);
+    }
+
+    @Test
+    public void testGroup(){
+        List<SpuItemAttrGroupVo> attrGroupWithAttrsBySpuId = attrGroupService.getAttrGroupWithAttrsBySpuId(13L, 225L);
+        System.out.println(attrGroupWithAttrsBySpuId);
+    }
+
+    @Test
+    public void RedisTest(){
+        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+        ops.set("hello","world"+ UUID.randomUUID().toString());
+
+        //
+        System.out.println("之前保存的数据是"+ops.get("hello"));
+    }
 
     @Test
     public void testUpload() throws FileNotFoundException {
@@ -40,9 +83,7 @@ class KedamallProductApplicationTests {
 
         // 上传Byte数组。
         InputStream inputStream = new FileInputStream("C:\\Users\\Aaron\\Desktop\\图片\\figure_paper.png");
-        ossClient.putObject("kedamall", "figure_paper222.png",inputStream);
         // 关闭OSSClient。
-        ossClient.shutdown();
         System.out.println("上传成功");
     }
 
