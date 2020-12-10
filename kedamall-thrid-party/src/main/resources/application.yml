@@ -9,6 +9,13 @@ spring:
       oss:
         endpoint: oss-cn-chengdu.aliyuncs.com
         bucket: kedamall
+      sms:
+        host: https://feginesms.market.alicloudapi.com
+        path: /codeNotice
+        skin: 1
+        sign: 1
+        appcode: 506ce3d9b051423e9de750128d577eaf
+
   application:
     name: kedamall-thrid-party
 

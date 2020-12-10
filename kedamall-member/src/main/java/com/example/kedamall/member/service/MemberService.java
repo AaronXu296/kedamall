@@ -3,6 +3,11 @@ package com.example.kedamall.member.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.utils.PageUtils;
 import com.example.kedamall.member.entity.MemberEntity;
+import com.example.kedamall.member.exception.PhoneExistException;
+import com.example.kedamall.member.exception.UserNameExistException;
+import com.example.kedamall.member.vo.MemberLoginVo;
+import com.example.kedamall.member.vo.MemberRegistVo;
+import com.example.kedamall.member.vo.SocialUser;
 
 import java.util.Map;
 
@@ -16,5 +21,15 @@ import java.util.Map;
 public interface MemberService extends IService<MemberEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void regist(MemberRegistVo vo);
+
+    void checkPhoneUnique(String phone) throws PhoneExistException;
+
+    void checkUserNameUnique(String userName) throws UserNameExistException;
+
+    MemberEntity login(MemberLoginVo vo);
+
+    MemberEntity login(SocialUser vo) throws Exception;
 }
 

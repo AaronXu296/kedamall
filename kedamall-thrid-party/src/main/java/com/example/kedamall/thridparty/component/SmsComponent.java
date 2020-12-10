@@ -1,48 +1,42 @@
-package com.example.kedamall.thridparty;
+package com.example.kedamall.thridparty.component;
 
-import com.aliyun.oss.OSSClient;
-import com.example.kedamall.thridparty.component.SmsComponent;
-import com.example.kedamall.thridparty.util.HttpUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SpringBootTest
-class KedamallThridPartyApplicationTests {
+@Component
+@Data
+@ConfigurationProperties("spring.cloud.alicloud.sms")
+public class SmsComponent {
 
-    @Autowired
-    private OSSClient ossClient;
+    private String host;
+    private String path;
+    private String skin;
+    private String sign;
+    private String appcode;
 
-    @Autowired
-    SmsComponent smsComponent;
+    public void sendSmsCode(String phone, String code){
+        //String host = "https://feginesms.market.alicloudapi.com";// 【1】请求地址 支持http 和 https 及 WEBSOCKET
+        //String path = "/codeNotice";// 【2】后缀
+        //String sign = "175622"; // 【4】请求参数，详见文档描述
+        //String skin = "1"; // 【4】请求参数，详见文档描述
+        //String code = "123456"; // 【4】请求参数，详见文档描述
+        //String phone = "18983499411"; // 【4】请求参数，详见文档描述
+        //String appcode = "506ce3d9b051423e9de750128d577eaf"; // 【3】开通服务后 买家中心-查看AppCode
 
-    @Test
-    public void sendCode(){
-        smsComponent.sendSmsCode("18983499411","2967284");
-    }
 
-
-    @Test
-    public void sendSms(){
-        String host = "https://feginesms.market.alicloudapi.com";// 【1】请求地址 支持http 和 https 及 WEBSOCKET
-        String path = "/codeNotice";// 【2】后缀
-        String appcode = "506ce3d9b051423e9de750128d577eaf"; // 【3】开通服务后 买家中心-查看AppCode
-        String sign = "175622"; // 【4】请求参数，详见文档描述
-        String skin = "1"; // 【4】请求参数，详见文档描述
-        String param = "123456"; // 【4】请求参数，详见文档描述
-        String phone = "18983499411"; // 【4】请求参数，详见文档描述
-        String urlSend = host + path + "?sign=" + sign + "&skin=" + skin+ "&param=" + param+ "&phone=" + phone; // 【5】拼接请求链接
+        String urlSend = host + path + "?sign=" + sign + "&skin=" + skin+ "&param=" + code+ "&phone=" + phone; // 【5】拼接请求链接
         try {
             URL url = new URL(urlSend);
             HttpURLConnection httpURLCon = (HttpURLConnection) url.openConnection();
@@ -82,7 +76,6 @@ class KedamallThridPartyApplicationTests {
             // e.printStackTrace();
         }
     }
-
     private static String read(InputStream is) throws IOException {
         StringBuffer sb = new StringBuffer();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -94,28 +87,4 @@ class KedamallThridPartyApplicationTests {
         br.close();
         return sb.toString();
     }
-
-    @Test
-    public void testUpload() throws FileNotFoundException {
-//        // Endpoint以杭州为例，其它Region请按实际情况填写。
-//        String endpoint = "oss-cn-chengdu.aliyuncs.com";
-//        // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建RAM账号。
-//        String accessKeyId = "LTAI4GAZUbcXaQ7w812Ujaqr";
-//        String accessKeySecret = "7hwlOA52Wx6JeJjW9jzPESYeMgD6qm";
-//
-//        // 创建OSSClient实例。
-//        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId,accessKeySecret);
-
-        // 上传Byte数组。
-        InputStream inputStream = new FileInputStream("C:\\Users\\Aaron\\Desktop\\图片\\figure_paper.png");
-        ossClient.putObject("kedamall", "figure_paper222.png",inputStream);
-        // 关闭OSSClient。
-        ossClient.shutdown();
-        System.out.println("上传成功");
-    }
-    @Test
-    void contextLoads() {
-
-    }
-
 }

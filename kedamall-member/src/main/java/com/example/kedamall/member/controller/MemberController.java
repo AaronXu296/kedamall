@@ -4,13 +4,15 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.example.common.exception.BizCodeEnum;
+import com.example.kedamall.member.exception.PhoneExistException;
+import com.example.kedamall.member.exception.UserNameExistException;
 import com.example.kedamall.member.feign.CouponFeignService;
+import com.example.kedamall.member.vo.MemberLoginVo;
+import com.example.kedamall.member.vo.MemberRegistVo;
+import com.example.kedamall.member.vo.SocialUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.kedamall.member.entity.MemberEntity;
 import com.example.kedamall.member.service.MemberService;
@@ -35,6 +37,17 @@ public class MemberController {
     @Autowired
     CouponFeignService couponFeignService;
 
+    @PostMapping("/oauth2/login")
+    public R oauthLogin(@RequestBody SocialUser vo) throws Exception {
+        MemberEntity entity = memberService.login(vo);
+        if(entity!=null){
+            return R.ok().setData(entity);
+        }else {
+            return R.error(BizCodeEnum.LOGIN_ACCOUNT_OR_PASSWORD_ERROR_EXCEPTION.getCode(),
+                    BizCodeEnum.LOGIN_ACCOUNT_OR_PASSWORD_ERROR_EXCEPTION.getMsg());
+        }
+    }
+
     //测试OpenFeign的方法
     @RequestMapping(value = "/coupons")
     public R test(){
@@ -42,6 +55,30 @@ public class MemberController {
         memberEntity.setNickname("张三");
         R membercoupons = couponFeignService.membercoupons();
         return R.ok().put("member",memberEntity).put("coupons",membercoupons.get("coupons"));
+    }
+
+    @PostMapping("/regist")
+    public R regist(@RequestBody MemberRegistVo vo){
+        try {
+            memberService.regist(vo);
+        }catch (PhoneExistException pe){
+            return R.error(BizCodeEnum.PHONE_EXIST_EXCEPTION.getCode(),BizCodeEnum.PHONE_EXIST_EXCEPTION.getMsg());
+        }catch (UserNameExistException ue){
+            return R.error(BizCodeEnum.USER_EXIST_EXCEPTION.getCode(),BizCodeEnum.USER_EXIST_EXCEPTION.getMsg());
+        }
+
+        return R.ok();
+    }
+
+    @PostMapping("/login")
+    public R login(@RequestBody MemberLoginVo vo){
+        MemberEntity entity = memberService.login(vo);
+        if(entity!=null){
+            return R.ok().setData(entity);
+        }else {
+            return R.error(BizCodeEnum.LOGIN_ACCOUNT_OR_PASSWORD_ERROR_EXCEPTION.getCode(),
+                    BizCodeEnum.LOGIN_ACCOUNT_OR_PASSWORD_ERROR_EXCEPTION.getMsg());
+        }
     }
 
     /**
