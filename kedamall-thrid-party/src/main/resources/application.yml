@@ -15,11 +15,20 @@ spring:
         skin: 1
         sign: 1
         appcode: 506ce3d9b051423e9de750128d577eaf
-
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: localhost:8080
   application:
     name: kedamall-thrid-party
 
 
 server:
   port: 30000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 

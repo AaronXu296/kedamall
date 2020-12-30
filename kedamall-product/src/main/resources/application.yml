@@ -8,6 +8,10 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: localhost:8080
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
@@ -43,3 +47,10 @@ feign:
         read-timeout: 20000
   hystrix:
     enabled: false
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

@@ -522,13 +522,18 @@
                         <li>京东价</li>
                         <li>
                             <span>￥</span>
-                            <span th:text="${#numbers.formatDecimal(item.info.price,3,2)}">4499.00</span>
+                            <span th:text="${#numbers.formatDecimal(item.info.price, 3, 2)}">4499.00</span>
+                        </li>
+                        <li style="color: red;" th:if="${item.seckillInfoVo != null}">
+                            <span th:if="${#dates.createNow().getTime() < item.seckillInfoVo.startTime}">
+                                商品将会在[[${#dates.format(new java.util.Date(item.seckillInfoVo.startTime), "yyyy-MM-dd HH:mm:ss")}]]进行秒杀活动
+                            </span>
+                            <span th:if="${#dates.createNow().getTime() >= item.seckillInfoVo.startTime && #dates.createNow().getTime() <= item.seckillInfoVo.endTime}">
+                                秒杀价 [[${#numbers.formatDecimal(item.seckillInfoVo.seckillPrice, 1, 2)}]]
+                            </span>
                         </li>
                         <li>
-                            预约享资格
-                        </li>
-                        <li>
-                            <a href="/static/item/">
+                            <a href="">
                                 预约说明
                             </a>
                         </li>
@@ -620,8 +625,7 @@
 							<dt>选择[[${attr.attrName}]]</dt>
 							<dd th:each="val : ${attr.attrValues}">
 								<a th:attr=" class=${#lists.contains(#strings.listSplit(val.skuIds,','),item.info.skuId.toString())
-                                   ? 'sku_attr_value checked': 'sku_attr_value'}, skus=${val.skuIds} "
-								>
+                                   ? 'sku_attr_value checked': 'sku_attr_value'}, skus=${val.skuIds} ">
 									[[${val.attrValue}]]
 									<!--											<img src="/static/item/img/59ddfcb1Nc3edb8f1.jpg" /> -->
 								</a>
@@ -632,9 +636,8 @@
 
                 <div class="box-btns clear">
                     <div class="box-btns-one">
-                        <input type="text" name="" id="productNum" value="1"/>
+                        <input type="text" name="" id="numInput" value="1"/>
                         <div class="box-btns-one1">
-
                             <div>
                                 <button id="jia">
                                     +
@@ -648,11 +651,18 @@
 
                         </div>
                     </div>
-                    <div class="box-btns-two">
-                        <a class="addToCart" href="http://cart.kedamall.com/addToCart" th:attr="skuId=${item.info.skuId}">
+                    <div class="box-btns-two" th:if="${item.seckillInfoVo != null && (#dates.createNow().getTime() >= item.seckillInfoVo.startTime && #dates.createNow().getTime() <= item.seckillInfoVo.endTime)}">
+                        <a id="seckillA" th:attr="skuId=${item.info.skuId}, sessionId=${item.seckillInfoVo.promotionSessionId}, code=${item.seckillInfoVo.randomCode}">
+                            立即抢购
+                        </a>
+                    </div>
+
+                    <div class="box-btns-two" th:if="${item.seckillInfoVo == null && (#dates.createNow().getTime() >= item.seckillInfoVo.startTime && #dates.createNow().getTime() <= item.seckillInfoVo.endTime)}">
+                        <a id="addToCartA" th:attr="skuId=${item.info.skuId}">
                             加入购物车
                         </a>
                     </div>
+
                     <div class="box-btns-three">
                         <img src="/static/item/img/e4ed3606843f664591ff1f68f7fda12d.png" alt=""/> 分享
                     </div>
@@ -1360,6 +1370,28 @@
 		}
 		return false;
 	});
+
+    $("#addToCartA").click(function () {
+        const num = $("#numInput").val();
+        const skuId = $(this).attr("skuId");
+        location.href = "http://cart.kedamall.com/addToCart?skuId=" + skuId + "&num=" + num;
+        return false;
+    });
+	
+    $("#seckillA").click(function () {
+        const isLogin = [[${session.loginUser != null}]]; // 已登录
+        if (isLogin) {
+            const killId = $(this).attr("sessionId") + "_" + $(this).attr("skuId");
+
+            const key = $(this).attr("code");//随机码
+            const num = $("#numInput").val();
+            location.href = "http://seckill.kedamall.com/kill?killId=" + killId + "&key=" + key + "&num=" + num;
+        } else {
+            alert("想要进行秒杀的话请先进行登录");
+        }
+
+        return false;
+    })
 
 </script>
 

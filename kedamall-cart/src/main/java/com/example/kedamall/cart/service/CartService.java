@@ -3,6 +3,7 @@ package com.example.kedamall.cart.service;
 import com.example.kedamall.cart.vo.CartItemVo;
 import com.example.kedamall.cart.vo.CartVo;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface CartService {
@@ -42,4 +43,7 @@ public interface CartService {
      * @param skuId
      */
     void deleteItem(Long skuId);
+
+    List<CartItemVo> getCurrentUserCartItems();
+
 }

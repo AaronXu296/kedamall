@@ -1,8 +1,12 @@
 package com.example.kedamall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
+import com.example.common.utils.R;
 import com.example.kedamall.product.entity.SkuImagesEntity;
 import com.example.kedamall.product.entity.SpuInfoDescEntity;
+import com.example.kedamall.product.feign.SeckillFeignService;
 import com.example.kedamall.product.service.*;
+import com.example.kedamall.product.vo.SeckillInfoVo;
 import com.example.kedamall.product.vo.SkuItemSaleAttrVo;
 import com.example.kedamall.product.vo.SkuItemVo;
 import com.example.kedamall.product.vo.SpuItemAttrGroupVo;
@@ -45,6 +49,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Autowired
     ThreadPoolExecutor threadPool;
+
+    @Autowired
+    SeckillFeignService seckillFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -151,9 +158,20 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             skuItemVo.setImages(imagesEntities);
         }, threadPool);
 
+        //查询当前sku是否参与秒杀优惠？？
+        CompletableFuture<Void> seckillFuture = CompletableFuture.runAsync(() -> {
+            R r = seckillFeignService.getSkuSeckillInfo(skuId);
+            if (r.getCode() == 0) {
+                SeckillInfoVo data = r.getData(new TypeReference<SeckillInfoVo>() {
+                });
+                skuItemVo.setSeckillInfoVo(data);
+            }
+        }, threadPool);
+
+
         //等待所有任务都完成：
 
-       CompletableFuture.allOf(saleAttrFuture,descFuture,baseAttrFuture,imagesFuture).get();
+       CompletableFuture.allOf(saleAttrFuture,descFuture,baseAttrFuture,imagesFuture,seckillFuture).get();
 
         return skuItemVo;
     }

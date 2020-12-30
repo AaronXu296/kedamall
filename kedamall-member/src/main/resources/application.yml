@@ -8,8 +8,13 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: localhost:8080
   application:
     name: kedamall-member
+
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
@@ -19,3 +24,18 @@ mybatis-plus:
 
 server:
   port: 8000
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 20000
+        read-timeout: 20000
+  hystrix:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

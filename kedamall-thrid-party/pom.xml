@@ -33,6 +33,10 @@
                     <groupId>com.baomidou</groupId>
                     <artifactId>mybatis-plus-boot-starter</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.alibaba.cloud</groupId>
+                    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
