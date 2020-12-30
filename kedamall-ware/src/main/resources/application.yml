@@ -8,6 +8,10 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: localhost:8080
   application:
     name: kedamall-ware
   jackson:
@@ -24,3 +28,10 @@ server:
 logging:
   level:
     com.example: debug
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

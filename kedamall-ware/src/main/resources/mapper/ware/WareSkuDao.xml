@@ -15,8 +15,29 @@
     <update id="addStock">
         UPDATE `wms_ware_sku` SET stock=stock+#{skuNum} WHERE sku_id=#{skuId} AND ware_id=#{wareId}
     </update>
+
+    <update id="lockSkuStock">
+        update kedamall_wms.wms_ware_sku
+        set stock_locked = stock_locked + #{num}
+        where sku_id = #{skuId}
+          and ware_id = #{wareId}
+          and stock - stock_locked >= #{num}
+    </update>
+    <update id="unLockStock">
+        update kedamall_wms.wms_ware_sku
+        set stock_locked = stock_locked - #{num}
+        where sku_id = #{skuId} and ware_id = #{wareId}
+    </update>
+
     <select id="getSkuStock" resultType="java.lang.Long">
         SELECT SUM(stock-stock_locked) FROM wms_ware_sku WHERE sku_id=#{sku};
+    </select>
+    
+    <select id="listWareIdHasSkuStock" resultType="java.lang.Long">
+        select ware_id
+        from kedamall_wms.wms_ware_sku
+        where sku_id = #{skuId}
+          and stock - stock_locked > 0;
     </select>
 
 
